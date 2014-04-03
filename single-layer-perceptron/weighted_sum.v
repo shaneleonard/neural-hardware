@@ -26,7 +26,8 @@ module weighted_sum(
 
 parameter N = 8;
 
-// stub
+// [TODO] Remove this stub implementation and replace it with a parameterized
+// adder tree
 assign sum = w[31:0];
 
 endmodule
