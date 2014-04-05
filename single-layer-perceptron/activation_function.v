@@ -24,14 +24,14 @@ module activation_function(
 );
 
 // [TODO] refine this representation
-`define ONE 32'b1000000000000000 /* 17.15 fixed point representation of 1.0 */
+`define ONE 32'h00008000 /* 17.15 fixed point representation of 1.0 */
 
 // Approximates a sigmoid function
 //         / 0, x < 0
 // f(x) = {  x, 0 <= x <= 1
 //         \ 1, x > 1
 always @(*) begin
-	if (x < 0)
+	if (x[31]) // x < 0
 		y = 32'b0;
 	else if (x > `ONE)
 		y = `ONE;
