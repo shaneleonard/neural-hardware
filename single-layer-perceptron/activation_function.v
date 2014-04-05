@@ -22,6 +22,8 @@ module activation_function(
     input signed [31:0] x,
     output reg signed [31:0] y
 );
+// [TODO] determine whether it is useful or necessary to use 32 bits for y, since
+// y will always be <= `ONE
 
 // [TODO] refine this representation
 `define ONE 32'h00008000 /* 17.15 fixed point representation of 1.0 */
