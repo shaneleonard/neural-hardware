@@ -54,7 +54,7 @@ wire [N-1:0] delayed_x;
 wire [(65 + N) * M - 1:0] pipeline; // 65 + N is the width of all the
                                     // delayed signals combined
 
-`define PIPELINE(i) (pipeline[(65 + N)*((i) + 1) - 1:(65 + N)*(i)])
+`define PIPELINE(i) pipeline[(65 + N)*((i) + 1) - 1:(65 + N)*(i)]
 
 generate
     genvar i;
