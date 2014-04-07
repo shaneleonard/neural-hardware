@@ -32,7 +32,7 @@ module weights(
 
 parameter N = 8;
 
-wire [31:0] delta = desired_output - output;
+wire [31:0] delta = expected_y - y;
 wire [31:0] adjustment = delta * learning_rate;
 
 
@@ -41,16 +41,28 @@ dffre #(32) bias_register(
     .d(bias_next),
     .q(bias),
     .en(train),
-    .reset(rst)
+    .r(rst)
 );
 
+
+wire [32*N-1:0] weights_next;
 generate
   genvar i;
   for (i = 0; i < N; i = i + 1)
   begin:weights_manager
+    
+    integer ub = 32*(i+1) - 1;
+    integer lb = 32*i;
+
+    assign weights_next[ub:lb] = x[i] ? weights[ub:lb] + adjustment : weights[ub:lb];
+
     dffre #(32) weight_register(
-      
+      .d(weights_next[ub:lb]),
+      .q(weights[ub:lb]),
+      .en(train),
+      .r(rst)
     );
+
   end
 endgenerate
 
