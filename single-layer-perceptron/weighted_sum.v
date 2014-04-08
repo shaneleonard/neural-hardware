@@ -41,13 +41,15 @@ dffr #(32) initial_sum_register(
     .r(rst)
 );
 
-wire [N*N-1:0] x_pipeline;
+localparam M = N; // number of required pipeline stages
+
+wire [M*N-1:0] x_pipeline;
 
 assign x_pipeline[N-1:0] = x;
 
 generate
     genvar i;
-    for (i = 0; i < N - 1; i = i + 1)
+    for (i = 0; i < M - 1; i = i + 1)
     begin:pipeline
 
         dffr #(N) x_pipeline_stage(

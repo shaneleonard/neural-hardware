@@ -61,11 +61,11 @@ module weighted_sum_tb;
 		rst = 0;
 		#10;
 
-        //////////////////////////////////////////////
-        // Homogenous positive weights, no overflow //
-        //////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    // Heterogenous positive weights, no overflow //
+    ////////////////////////////////////////////////
         
-        w = {32'd1, 32'd2, 32'd4, 32'd8, 32'd16, 32'd32, 32'd64, 32'd128};
+    w = {32'd1, 32'd2, 32'd4, 32'd8, 32'd16, 32'd32, 32'd64, 32'd128};
 		
 		// Test: single input
 		x = 1;
@@ -92,7 +92,7 @@ module weighted_sum_tb;
 		x = 1 << 7;
 		#200;
 
-		// Test: single input
+		// Test: single input (inputs updated every cycle)
 		x = 1;
 		#20;
 
