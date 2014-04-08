@@ -19,6 +19,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module weighted_sum(
+    input clk,
+    input rst,
     input [N-1:0] x,
     input [32*N-1:0] w,
     output [31:0] sum
@@ -31,18 +33,27 @@ parameter N = 8;
 // [TODO] Account for overflow
 wire [32*N-1:0] intermediate_sums;
 
-always @(posedge clk) begin
-  intermediate_sums[31:0] <= w[31:0];
-end
+wire [31:0] initial_term = x[0] ? w[31:0] : 32'b0;
+dffr #(32) initial_sum_register(
+    .d(initial_term),
+    .q(intermediate_sums[31:0]),
+    .clk(clk),
+    .r(rst)
+);
 
 generate
   genvar i;
   for (i = 1; i < N; i = i + 1)
   begin:weighted_sum
-    always @(posedge clk) begin
-      intermediate_sums[32*(i+1)-1:32*i] <= intermediate_sums[32*i-1:32*(i-1)] 
-                                            + w[32*(i+1)-1:32*i];
-    end
+  
+    wire [31:0] summation_term = x[i] ? w[32*(i+1)-1:32*i] : 32'b0;
+    dffr #(32) running_sum_register(
+        .d(intermediate_sums[32*i-1:32*(i-1)] + summation_term),
+        .q(intermediate_sums[32*(i+1)-1:32*i]),
+        .clk(clk),
+        .r(rst)
+    );
+  
   end
 endgenerate
 
