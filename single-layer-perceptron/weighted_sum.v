@@ -41,29 +41,34 @@ dffr #(32) initial_sum_register(
     .r(rst)
 );
 
-reg [N*N-1:0] x_pipeline;
+wire [N*N-1:0] x_pipeline;
+
+assign x_pipeline[N-1:0] = x;
 
 generate
     genvar i;
     for (i = 0; i < N - 1; i = i + 1)
     begin:pipeline
 
-        always @(posedge clk) begin
-           x_pipeline[N*(i+2)-1:N*(i+1)] <= x_pipeline[N*(i+1)-1:N*i];
-        end
+        dffr #(N) x_pipeline_stage(
+            .d(x_pipeline[N*(i+1)-1:N*i]),
+            .q(x_pipeline[N*(i+2)-1:N*(i+1)]),
+            .clk(clk),
+            .r(rst)
+        );
 
     end
 endgenerate
 
 generate
-  genvar i;
-  for (i = 1; i < N; i = i + 1)
+  genvar j;
+  for (j = 1; j < N; j = j + 1)
   begin:weighted_sum
   
-    wire [31:0] summation_term = x_pipeline[i+N*i] ? w[32*(i+1)-1:32*i] : 32'b0;
+    wire [31:0] summation_term = x_pipeline[j+N*j] ? w[32*(j+1)-1:32*j] : 32'b0;
     dffr #(32) running_sum_register(
-        .d(intermediate_sums[32*i-1:32*(i-1)] + summation_term),
-        .q(intermediate_sums[32*(i+1)-1:32*i]),
+        .d(intermediate_sums[32*j-1:32*(j-1)] + summation_term),
+        .q(intermediate_sums[32*(j+1)-1:32*j]),
         .clk(clk),
         .r(rst)
     );
