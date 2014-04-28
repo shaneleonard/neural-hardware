@@ -21,16 +21,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 module weighted_sum_top(
 	input  clk,
-	input  [ 18*N-1 :0 ] x, w,
+	input  [ 18*N-1 : 0 ] x, w,
 	output [ 47:0 ] sum
 );
 
 parameter N = 8; // number of 18-bit inputs
 
+// M = MIN(N, `SPARTAN6_XC6SLX9_DSP_SLICES)
+localparam M = `SPARTAN6_XC6SLX9_DSP_SLICES < N ? `SPARTAN6_XC6SLX9_DSP_SLICES : N;
+
 wire [47:0] carry   [N - 1:0];
 wire [47:0] int_sum [N - 1:0];
-
-assign sum = int_sum[N - 1];
 
 weighted_sum_slice start(
 	.clk  ( clk        ),
@@ -43,19 +44,35 @@ weighted_sum_slice start(
 
 generate
 	genvar i;
-	for (i = 1; i < N; i = i + 1)
+	for (i = 1; i < M; i = i + 1)
 	begin:dsp_slice
 		
+		wire [17:0] x_delayed, w_delayed;
+
+		fifo #(.WIDTH(18), .DEPTH(i)) input_fifo(
+			.clk( clk                ),
+			.in ( x[18*i-1:18*(i-1)] ),
+			.out( x_delayed          )
+		);
+
+		fifo #(.WIDTH(18), .DEPTH(i)) weight_fifo(
+			.clk( clk               ),
+			.in ( w[18*i-1:18*(i-1)]),
+			.out( w_delayed         )
+		);
+
 		weighted_sum_slice slice(
-			.clk  ( clk         ),
-			.a    ( x[18*i-1:0] ),
-			.b    ( w[18*i-1:0] ),
-			.pcin ( carry[i-1]  ),
-			.pcout( carry[i]    ),
-			.p    ( int_sum[i]  )
+			.clk  ( clk        ),
+			.a    ( x_delayed  ),
+			.b    ( w_delayed  ),
+			.pcin ( carry[i-1] ),
+			.pcout( carry[i]   ),
+			.p    ( int_sum[i] )
 		);
 
 	end
 endgenerate
+
+assign sum = int_sum[N - 1];
 
 endmodule
