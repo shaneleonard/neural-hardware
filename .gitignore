@@ -100,6 +100,12 @@ par_usage_statistics.html
 usage_statistics_webtalk.html
 webtalk.log
 webtalk_pn.xml
+*.log
+*.cmd
+*.wdb
+*.exe
+*.xmsgs
+*.ini
 
 # generated folders
 iseconfig/
@@ -107,3 +113,5 @@ xlnx_auto_0_xdb/
 xst/
 _ngo/
 _xmsgs/
+ipcore_dir/
+isim/
