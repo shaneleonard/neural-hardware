@@ -38,10 +38,10 @@ wire [31:0] adjustment = delta * learning_rate;
 
 wire [31:0] bias_next = bias + adjustment;
 dffre #(32) bias_register(
-    .d(bias_next),
-    .q(bias),
-    .en(train),
-    .r(rst)
+    .d ( bias_next ),
+    .q ( bias      ),
+    .en( train     ),
+    .r ( rst       )
 );
 
 
@@ -51,16 +51,16 @@ generate
   for (i = 0; i < N; i = i + 1)
   begin:weights_manager
     
-    integer ub = 32*(i+1) - 1;
-    integer lb = 32*i;
+    localparam ub = 32*(i+1) - 1;
+    localparam lb = 32*i;
 
     assign weights_next[ub:lb] = x[i] ? weights[ub:lb] + adjustment : weights[ub:lb];
 
     dffre #(32) weight_register(
-      .d(weights_next[ub:lb]),
-      .q(weights[ub:lb]),
-      .en(train),
-      .r(rst)
+      .d ( weights_next[ub:lb] ),
+      .q ( weights[ub:lb]      ),
+      .en( train               ),
+      .r ( rst                 )
     );
 
   end
