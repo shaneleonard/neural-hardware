@@ -19,22 +19,22 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module activation_function(
-    input signed [31:0] x,
-    output reg signed [31:0] y
+    input      signed [47 : 0] x,
+    output reg signed [47 : 0] y
 );
-// [TODO] determine whether it is useful or necessary to use 32 bits for y, since
+// [TODO] determine whether it is useful or necessary to use 48 bits for y, since
 // y will always be <= `ONE
 
 // [TODO] refine this representation
-`define ONE 32'h00008000 /* 17.15 fixed point representation of 1.0 */
+`define ONE 48'h000001000000 /* 24.24 fixed point representation of 1.0 */
 
 // Approximates a sigmoid function
 //         / 0, x < 0
 // f(x) = {  x, 0 <= x <= 1
 //         \ 1, x > 1
 always @(*) begin
-	if (x[31]) // x < 0
-		y = 32'b0;
+	if (x[47]) // x < 0
+		y = 47'b0;
 	else if (x > `ONE)
 		y = `ONE;
 	else 

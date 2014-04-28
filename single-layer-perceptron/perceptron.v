@@ -19,82 +19,65 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module perceptron(
-    input clk,
-    input rst,
-    input [N-1:1] x, // perceptron input signals
-    input train,    // high when the current input should be used for training
-    input [31:0] learning_rate, // fixed-point number representing the learning rate
-    input [31:0] expected_y, // expected perceptron output; used for training
-    output [31:0] y // perceptron output
+    input  clk,
+    input  rst,
+    input  [18*N-1 : 0] x,         // perceptron input signals
+    input  train,                  // high when the current input should be used for training
+    input  [17 : 0] learning_rate, // fixed-point number representing the learning rate
+    input  [47 : 0] expected_y,    // expected perceptron output; used for training
+    output [47 : 0] y              // perceptron output
 );
 
-parameter N = 8;
+parameter N = 8;   // number of inputs
 
-wire [32*N - 1:0] weights; // each of the N elements is a signed 32-bit number
-wire signed [31:0] weighted_sum_out;
-weighted_sum #(N) weighted_sum(
+wire [18*N-1 : 0] weights; // each of the N elements is a signed number
+wire signed [47 : 0] weighted_sum_out;
+weighted_sum #(N) weighted_sum_top(
     // inputs
+    .clk(clk),
     .x(x),
     .w(weights),
     // output
     .sum(weighted_sum_out)
 );
 
-///////////////////////////////////////////////////////////////////////////////
-// This pipeline delays the inputs by M clock cycles so that they are        //
-// synchronized with the output signal (before being fed into the weights    //
-// module)                                                                   //
-///////////////////////////////////////////////////////////////////////////////
-localparam M = 4; // Number of pipeline stages
-
 wire delayed_train;
-wire [31:0] delayed_learning_rate, delayed_exp_y;
-wire [N-1:0] delayed_x;
+wire [18  : 0] delayed_learning_rate, delayed_exp_y;
+wire [N-1 : 0] delayed_x;
 
-wire [(65 + N) * M - 1:0] pipeline; // 65 + N is the width of all the
-                                    // delayed signals combined
-
-`define PIPELINE(i) pipeline[(65 + N)*((i) + 1) - 1:(65 + N)*(i)]
-
-generate
-    genvar i;
-    for (i = 0; i < M - 1; i = i + 1)
-    begin:pipeline_stage
-        always @(posedge clk) begin
-            `PIPELINE(i + 1) <= `PIPELINE(i);
-        end
-    end
-endgenerate
-
-assign `PIPELINE(0) = {train, learning_rate, expected_y, x};
-assign {delayed_train, delayed_learning_rate, delayed_exp_y, delayed_x} = `PIPELINE(M-1); 
-
-///////////////////////////////////////////////////////////////////////////////
+fifo #(
+    .WIDTH(1 + 18 + 18 + 18*N), 
+    .DEPTH(`SUM_LATENCY + N)) 
+weights_manager_fifo(
+    .clk ( clk ),
+    .in  ( {train,         learning_rate,         expected_y,    x        }),
+    .out ( {delayed_train, delayed_learning_rate, delayed_exp_y, delayed_x})
+);
 
 // The weights module maintains the bias and the weights that are applied to
 // the perceptron inputs. It trains them according to the learning rule.
-wire signed [31:0] bias;
+wire signed [18 : 0] bias;
 weights #(N) weights_manager(
     // inputs
-    .clk(clk),
-    .rst(rst),
-    .train(delayed_train),
-    .x(delayed_x),
-    .expected_y(delayed_exp_y),
-    .learning_rate(delayed_learning_rate),
-    .y(y),
+    .clk           ( clk ),
+    .rst           ( rst ),
+    .train         ( delayed_train         ),
+    .x             ( delayed_x             ),
+    .expected_y    ( delayed_exp_y         ),
+    .learning_rate ( delayed_learning_rate ),
+    .y             ( y ),
     // outputs
-    .weights(weights),
-    .bias(bias)
+    .weights ( weights ),
+    .bias    ( bias    )
 );
 
 // The activation function applies a sigmoid-like squashing function to the 
 // weighted sum of the inputs.
-wire signed [31:0] net;
+wire signed [47 : 0] net;
 assign net = weighted_sum_out + bias;
 activation_function threshold(
-    .x(net), // input
-    .y(y)    // output
+    .x ( net ),   // input
+    .y ( y   )    // output
 );
 
 endmodule
