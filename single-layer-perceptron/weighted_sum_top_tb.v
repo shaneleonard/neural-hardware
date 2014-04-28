@@ -24,15 +24,18 @@
 
 module weighted_sum_top_tb;
 
-	parameter N = 3;
+	parameter N = 2;
 
 	// Inputs
 	reg clk;
-	reg [18*N-1:0] x;
-	reg [18*N-1:0] w;
+	reg [18*N-1:0] x, w;
+
+	reg [17:0] x_val;
+	reg [17:0] w_val;
 
 	// Outputs
 	wire [47:0] sum;
+	wire [17:0] x_delayed, w_delayed;
 
 	// Instantiate the Unit Under Test (UUT)
 	weighted_sum_top #(N) uut (
@@ -40,6 +43,12 @@ module weighted_sum_top_tb;
 		.x(x), 
 		.w(w), 
 		.sum(sum) 
+	);
+
+	fifo #(.WIDTH(18*N*2), .DEPTH(3 + N)) input_output_sync(
+		.clk(clk),
+		.in({x_val, w_val}),
+		.out({x_delayed, w_delayed})
 	);
 
 	initial begin
@@ -54,11 +63,42 @@ module weighted_sum_top_tb;
 
 		// Wait 100 ns for global reset to finish
 		#100;
+
+		// Slight offset for clk
+		#2;
         
-		// Add stimulus here
-		x = {N{18'd10}};
-		w = {{18'd2},{18'd500},{18'd30}};
+		x_val = 18'd10;
+		w_val = 18'd2;
+
+		x = {N{x_val}};
+		w = {N{w_val}};
+		#10;
+
+        ////////////////////////////
+		//    Add stimulus here   //
+        ////////////////////////////
+		forever begin 
+			x_val = x_val + 1;
+			w_val = w_val + 1;
+			
+			x = {N{x_val}};
+			w = {N{w_val}};
+			#10;
+		end
+		////////////////////////////
+	end
+
+	always @(posedge clk) begin
+		if (N * x_delayed * w_delayed != sum) begin
+			$display("Expected %d... Got %d instead", N * x_delayed * w_delayed, sum);
+		end
 	end
       
-endmodule
 
+    initial begin
+    	
+    	#1000;
+    	$finish;
+
+    end
+endmodule
