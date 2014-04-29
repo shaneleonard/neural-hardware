@@ -24,6 +24,8 @@ module perceptron_top(
 	output TX
 );
 
+parameter N = 8; // number of input pairs to the weighted sum module
+
 ////////////////////////
 // Configure the UART //
 ////////////////////////
@@ -67,14 +69,27 @@ uart_tx6 uart_tx6 (
     .clk(baud_clk) 
 );
 
-wire [7:0] binary = din;
+wire [47:0] sum;
 
-send_binary_as_ascii #(8) bin_to_char(
+send_binary_as_ascii #(48) bin_to_char(
     .en_16_x_baud(en_16_x_baud),
     .send(rx_data_present),
-    .binary_in(binary),
+    .binary_in(sum),
     .ascii_out(dout),
     .data_present(tx_data_present)
+);
+
+wire [17:0] x_val = 18'd10;
+wire [17:0] w_val = 18'd2;
+
+wire [18*N-1:0] x = {N*{x_val}};
+wire [18*N-1:0] w = {N*{w_val}};
+
+weighted_sum_top #(N) weighted_sum(
+	.clk(baud_clk),
+	.x(x), 
+	.w(w),
+	.sum(sum)
 );
 
 endmodule
