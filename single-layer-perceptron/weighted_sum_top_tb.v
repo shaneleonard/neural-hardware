@@ -24,7 +24,7 @@
 
 module weighted_sum_top_tb;
 
-	parameter N = 2;
+	parameter N = 16;
 
 	// Inputs
 	reg clk;
