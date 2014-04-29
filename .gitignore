@@ -106,6 +106,9 @@ webtalk_pn.xml
 *.exe
 *.xmsgs
 *.ini
+*.xsl
+*.xml
+*.xwbt
 
 # generated folders
 iseconfig/
