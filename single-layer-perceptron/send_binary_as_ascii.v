@@ -26,7 +26,7 @@ module send_binary_as_ascii(
     input en_16_x_baud,
     input send,
     input [N-1:0] binary_in,
-    output reg [8:0] ascii_out,
+    output reg [7:0] ascii_out,
     output data_present
 );
 
@@ -37,14 +37,14 @@ reg [N+1 : 0] counter = 0;
 
 always @(posedge en_16_x_baud) begin
 	if (send) begin
-		shifted_binary = binary_in;
-		counter = 1;
+		shifted_binary <= binary_in;
+		counter <= 1;
 	end else if (!counter) begin
-		shifted_binary = 0;
-		counter = 0;
+		shifted_binary <= 0;
+		counter <= 0;
 	end else begin
-		shifted_binary = shifted_binary << 1;
-		counter = counter << 1;
+		shifted_binary <= shifted_binary << 1;
+		counter <= counter << 1;
 	end
 end
 

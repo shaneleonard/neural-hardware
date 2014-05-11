@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "uart_tx6.v"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -41,8 +42,15 @@ dcm32to96mhz baud_clk_generator
     .CLK_OUT1(baud_clk)
 );  // OUT
 
+reg baud_count = 0;
+
 always @(posedge baud_clk) begin
-	en_16_x_baud = ~en_16_x_baud; // halve the 96 MHz clock to 48 MHz
+	if (~baud_count) begin
+		en_16_x_baud <= 1;
+	end else begin
+		en_16_x_baud <= 0;
+	end
+	baud_count <= baud_count + 1;
 end
 
 uart_rx6 uart_rx6 (
@@ -69,9 +77,11 @@ uart_tx6 uart_tx6 (
     .clk(baud_clk) 
 );
 
-wire [47:0] sum;
+parameter M = 8;
 
-send_binary_as_ascii #(48) bin_to_char(
+wire [M-1:0] sum = {M{1'b1}};
+
+send_binary_as_ascii #(M) bin_to_char(
     .en_16_x_baud(en_16_x_baud),
     .send(rx_data_present),
     .binary_in(sum),
@@ -79,17 +89,17 @@ send_binary_as_ascii #(48) bin_to_char(
     .data_present(tx_data_present)
 );
 
-wire [17:0] x_val = 18'd10;
-wire [17:0] w_val = 18'd2;
+// wire [17:0] x_val = 18'd10;
+// wire [17:0] w_val = 18'd2;
 
-wire [18*N-1:0] x = {N*{x_val}};
-wire [18*N-1:0] w = {N*{w_val}};
+// wire [18*N-1:0] x = {N*{x_val}};
+// wire [18*N-1:0] w = {N*{w_val}};
 
-weighted_sum_top #(N) weighted_sum(
-	.clk(baud_clk),
-	.x(x), 
-	.w(w),
-	.sum(sum)
-);
+// weighted_sum_top #(N) weighted_sum(
+// 	.clk(baud_clk),
+// 	.x(x), 
+// 	.w(w),
+// 	.sum(sum)
+// );
 
 endmodule
