@@ -1,0 +1,15 @@
+# Output products list for <weighted_sum_slice>
+_xmsgs/pn_parser.xmsgs
+weighted_sum_slice/doc/dsp48_macro_ds754.pdf
+weighted_sum_slice/doc/xbip_dsp48_macro_v2_1_readme.txt
+weighted_sum_slice/doc/xbip_dsp48_macro_v2_1_vinfo.html
+weighted_sum_slice.asy
+weighted_sum_slice.gise
+weighted_sum_slice.ngc
+weighted_sum_slice.sym
+weighted_sum_slice.v
+weighted_sum_slice.veo
+weighted_sum_slice.xco
+weighted_sum_slice.xise
+weighted_sum_slice_flist.txt
+weighted_sum_slice_xmdf.tcl
