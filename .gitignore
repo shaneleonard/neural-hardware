@@ -52,7 +52,6 @@ vsim.dbg
 # XILINX ISE .gitignore
 # intermediate build files
 *.bgn
-*.bit
 *.bld
 *.cmd_log
 *.drc
@@ -61,7 +60,6 @@ vsim.dbg
 *.msd
 *.msk
 *.ncd
-*.ngc
 *.ngd
 *.ngr
 *.pad
@@ -115,5 +113,4 @@ xlnx_auto_0_xdb/
 xst/
 _ngo/
 _xmsgs/
-ipcore_dir/
 isim/
