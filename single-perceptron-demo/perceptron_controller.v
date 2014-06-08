@@ -31,12 +31,13 @@ module perceptron_controller(
 
 parameter N = 8;
 
-reg [1:0] state;
+reg [2:0] state;
 wire load_complete;
 
-localparam START = 2'b00;
-localparam LOAD_DATA = 2'b01;
-localparam ACTIVATE  = 2'b10;
+localparam START     = 3'b000;
+localparam LOAD_DATA = 3'b100;
+localparam ACTIVATE  = 3'b010;
+localparam PAUSE     = 3'b001;
 
 always @(posedge clk) begin
 	if (rst) begin
@@ -45,7 +46,8 @@ always @(posedge clk) begin
 		case (state)
 			START:     state <= enable ? LOAD_DATA : START;
 			LOAD_DATA: state <= load_complete ? ACTIVATE : LOAD_DATA;
-			ACTIVATE:  state <= START;
+			ACTIVATE:  state <= PAUSE;
+			PAUSE:     state <= fire ? START : PAUSE;
 			default:   state <= START;
 		endcase
 	end
@@ -71,7 +73,7 @@ always @(posedge clk) begin
 	end else begin
 		case (state)
 			LOAD_DATA: bram_data_addr <= bram_data_addr + 1;
-			ACTIVATE:  bram_data_addr <= end_addr;
+			PAUSE:     bram_data_addr <= end_addr;
 			default:   bram_data_addr <= start_addr;
 		endcase
 	end
@@ -79,36 +81,43 @@ end
 
 assign perceptron_enable = (state == ACTIVATE);
 
-reg [16*N-1:0] x,w;
+wire [16*N-1:0] x,w;
 
-always @(posedge clk) begin
-	x[16*N-1:16*(N-1)] <= bram_data_in[15:0];
-	w[16*N-1:16*(N-1)] <= bram_data_in[31:16];
-end
+assign x[16*N-1:16*(N-1)] = bram_data_in[15:0];
+assign w[16*N-1:16*(N-1)] = bram_data_in[31:16];
+
+
+localparam ONE = 16'b1;
 
 generate
 	genvar i;
 	for (i = N-1; i > 0; i=i-1) 
 	begin:input_pipeline
-		always @(posedge clk) begin
-			if (rst) begin
-				x[16*i-1:16*(i-1)] <= 0;
-				w[16*i-1:16*(i-1)] <= 0;
-			end else if (state == LOAD_DATA) begin
-				x[16*i-1:16*(i-1)] <= x[16*(i+1)-1:16*i];
-				w[16*i-1:16*(i-1)] <= w[16*(i+1)-1:16*i];
-			end else begin
-				x[16*i-1:16*(i-1)] <= x[16*i-1:16*(i-1)];
-				w[16*i-1:16*(i-1)] <= w[16*i-1:16*(i-1)];
-			end
-		end
+
+		dffre #(16) x_shift_register(
+			.clk(clk),
+			.r(rst),
+			.en(state==LOAD_DATA),
+			.d( x[16*(i+1)-1:16*i] ),
+			.q( x[16*i-1:16*(i-1)] )
+		);
+
+		dffre #(16) w_shift_register(
+			.clk(clk),
+			.r(rst),
+			.en(state==LOAD_DATA),
+			.d( w[16*(i+1)-1:16*i] ),
+			.q( w[16*i-1:16*(i-1)] )
+		);
+
 	end
 endgenerate
 
 perceptron #(N) perceptron(
 	.clk(clk),
 	.enable(perceptron_enable),
-	.x(x), .w(w),
+	.x({N{16'b1}}), 
+	.w({N{16'd2}}),
 	.y(perceptron_out),
 	.fire(fire)
 );

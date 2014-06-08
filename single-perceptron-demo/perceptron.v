@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `define SUM_LATENCY 3
-`define THRESHOLD_LATENCY 1
+`define THRESHOLD_LATENCY 1 
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -44,13 +44,16 @@ activation_function threshold(
     .y(y)
 );
 
-fifo #(
-    .WIDTH(1), 
-    .DEPTH(N + `SUM_LATENCY + `THRESHOLD_LATENCY)
-) perceptron_latency (
-    .clk(clk),
-    .in(enable),
-    .out(fire)
-);
+reg [N + `SUM_LATENCY + `THRESHOLD_LATENCY - 1:0] count;
+
+always @(posedge clk) begin
+    if (enable) begin
+        count <= 1;
+    end else begin
+        count <= count << 1;
+    end
+end
+
+assign fire = count[N + `SUM_LATENCY + `THRESHOLD_LATENCY - 1];
 
 endmodule

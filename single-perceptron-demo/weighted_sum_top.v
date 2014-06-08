@@ -30,21 +30,31 @@ parameter N = 8; // number of 16-bit inputs
 // M = MIN(N, `SPARTAN6_XC6SLX9_DSP_SLICES)
 localparam M = `SPARTAN6_XC6SLX9_DSP_SLICES < N ? `SPARTAN6_XC6SLX9_DSP_SLICES : N;
 
-wire [47:0] carry   [N - 1:0];
-wire [47:0] int_sum [N - 1:0];
+wire [47:0] carry   [M:0];
+wire [47:0] int_sum [M-1:0];
 
-weighted_sum_slice start(
-	.clk  ( clk             ),
-	.a    ( {2'b0, x[15:0]} ),
-	.b    ( {2'b0, w[15:0]} ),
-	.pcin ( 48'b0           ),
-	.pcout( carry[0]        ),
-	.p    ( int_sum[0]      )
+wire [17:0] x_start, w_start;
+wire [35:0] p_start;
+
+fifo #(.WIDTH(36), .DEPTH(1)) input_fifo(
+	.clk( clk                  ),
+	.in ( { x[15], x[15], x[15:0], w[15], w[15], w[15:0] } ),
+	.out( { x_start, w_start } )
 );
+
+weighted_sum_start_slice start(
+	.clk  ( clk             ),
+	.a    ( x_start         ),
+	.b    ( w_start         ),
+	.pcout( carry[0]        ),
+	.p    ( p_start         )
+);
+
+assign int_sum[0] = p_start;
 
 generate
 	genvar i;
-	for (i = 1; i < M; i = i + 1)
+	for (i = 2; i < M + 1; i = i + 1)
 	begin:dsp_slice
 		
 		wire [15:0] x_delayed, w_delayed;
@@ -56,23 +66,23 @@ generate
 		);
 
 		fifo #(.WIDTH(16), .DEPTH(i)) weight_fifo(
-			.clk( clk               ),
-			.in ( w[16*i-1:16*(i-1)]),
-			.out( w_delayed         )
+			.clk( clk                ),
+			.in ( w[16*i-1:16*(i-1)] ),
+			.out( w_delayed          )
 		);
 
 		weighted_sum_slice slice(
 			.clk  ( clk               ),
 			.a    ( {2'b0, x_delayed} ),
 			.b    ( {2'b0, w_delayed} ),
-			.pcin ( carry[i-1]        ),
-			.pcout( carry[i]          ),
-			.p    ( int_sum[i]        )
+			.pcin ( carry[i-2]        ),
+			.pcout( carry[i-1]        ),
+			.p    ( int_sum[i-1]      )
 		);
 
 	end
 endgenerate
 
-assign sum = int_sum[N - 1];
+assign sum = int_sum[M-1];
 
 endmodule

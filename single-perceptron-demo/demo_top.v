@@ -75,7 +75,7 @@ uart_ram_mcu simple_mcu (
     .state( LED )
 );
 
-perceptron_controller perceptron(
+perceptron_controller #(10) perceptron(
 	.clk    ( clk_96Mhz ),
 	.rst    ( SWITCH[0] ),
 	.enable ( perceptron_enable ),
