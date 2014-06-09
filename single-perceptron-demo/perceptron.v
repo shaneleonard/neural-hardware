@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `define SUM_LATENCY 3
-`define THRESHOLD_LATENCY 1 
+`define THRESHOLD_LATENCY 4
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -22,6 +22,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 module perceptron(
     input clk,
+    input rst,
     input enable,
     input [16*N-1:0] x, w,
     output [15:0] y,
@@ -30,11 +31,21 @@ module perceptron(
 
 parameter N = 8; // number of inputs
 
+wire [16*N-1:0] x_latched, w_latched;
+
+dffre #(16*N*2) input_register(
+    .clk( clk  ),
+    .r  ( rst ),
+    .en ( enable ),
+    .d  ( {x, w} ),
+    .q  ( {x_latched, w_latched} )
+);
+
 wire [47:0] sum;
 weighted_sum_top #(N) weighted_sum(
     .clk(clk),
-    .x(x),
-    .w(w),
+    .x(x_latched),
+    .w(w_latched),
     .sum(sum)
 );
 
@@ -47,7 +58,9 @@ activation_function threshold(
 reg [N + `SUM_LATENCY + `THRESHOLD_LATENCY - 1:0] count;
 
 always @(posedge clk) begin
-    if (enable) begin
+    if (rst) begin
+        count <= 0;
+    end else if (enable) begin
         count <= 1;
     end else begin
         count <= count << 1;

@@ -45,6 +45,10 @@ wire [31:0] perceptron_bram_dout;
 wire [8:0]  perceptron_bram_addr;
 wire [15:0] perceptron_out;
 
+wire [31:0] bram_data_out;
+wire [8:0] bram_data_addr;
+
+
 uart_ram_mcu simple_mcu (
     .clk ( clk_96Mhz ),
     .rst ( SWITCH[0] ),
@@ -75,14 +79,13 @@ uart_ram_mcu simple_mcu (
     .state( LED )
 );
 
-perceptron_controller #(10) perceptron(
-	.clk    ( clk_96Mhz ),
-	.rst    ( SWITCH[0] ),
-	.enable ( perceptron_enable ),
-	.start_addr     ( 9'b0 ),
-	.end_addr       ( 9'd8 ),
-	.bram_data_in   ( perceptron_bram_dout ),
-	.bram_data_addr ( perceptron_bram_addr ),
+perceptron_controller #(8) perceptron(
+	.clk            ( clk_96Mhz ),
+	.rst            ( SWITCH[0] ),
+	.enable         ( perceptron_enable ), 
+    .bram_data      ( bram_data_out   ),
+    .bram_data_addr ( bram_data_addr  ),
+    .output_addr    ( perceptron_bram_addr ),
 	.perceptron_out ( perceptron_out  ),
 	.fire           ( perceptron_fire )
 );
@@ -144,7 +147,6 @@ serial_data_to_bram rx_to_ram (
 wire [ 7:0] tx_data; 
 wire        tx_data_write;
 wire        tx_buffer_full;
-wire [31:0] bram_data_out;
 wire [ 8:0] bram_read_addr;
 
 bram_data_to_serial ram_to_tx (
@@ -172,7 +174,6 @@ bram_data_to_serial ram_to_tx (
 //                                Block Memory                                  //
 //////////////////////////////////////////////////////////////////////////////////
 
-wire [8:0] bram_data_addr;
 wire [3:0] bram_enable_bytes;
 wire       bram_enable;
 

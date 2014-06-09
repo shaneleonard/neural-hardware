@@ -21,105 +21,71 @@
 module perceptron_controller(
 	input clk, rst,
 	input enable,
-	input [8:0] start_addr,
-	input [8:0] end_addr,
-	input [31:0] bram_data_in,
-	output reg [8:0] bram_data_addr,
+	input [8:0] bram_data_addr,
+	output [8:0] output_addr,
+	input [31:0] bram_data,
 	output [15:0] perceptron_out,
 	output fire
 );
 
 parameter N = 8;
 
-reg [2:0] state;
-wire load_complete;
-
-localparam START     = 3'b000;
-localparam LOAD_DATA = 3'b100;
-localparam ACTIVATE  = 3'b010;
-localparam PAUSE     = 3'b001;
-
-always @(posedge clk) begin
-	if (rst) begin
-		state <= START;
-	end else begin
-		case (state)
-			START:     state <= enable ? LOAD_DATA : START;
-			LOAD_DATA: state <= load_complete ? ACTIVATE : LOAD_DATA;
-			ACTIVATE:  state <= PAUSE;
-			PAUSE:     state <= fire ? START : PAUSE;
-			default:   state <= START;
-		endcase
-	end
-end
-
-reg [N-1:0] counter;
-always @(posedge clk) begin
-	if (rst) begin
-		counter <= 1;
-	end else begin
-		case (state)
-			LOAD_DATA: counter <= counter << 1;
-			default:   counter <= 1;
-		endcase
-	end
-end
-
-assign load_complete = counter[N-1];
-
-always @(posedge clk) begin
-	if (rst) begin
-		bram_data_addr <= 0;
-	end else begin
-		case (state)
-			LOAD_DATA: bram_data_addr <= bram_data_addr + 1;
-			PAUSE:     bram_data_addr <= end_addr;
-			default:   bram_data_addr <= start_addr;
-		endcase
-	end
-end
-
-assign perceptron_enable = (state == ACTIVATE);
-
 wire [16*N-1:0] x,w;
 
-assign x[16*N-1:16*(N-1)] = bram_data_in[15:0];
-assign w[16*N-1:16*(N-1)] = bram_data_in[31:16];
+assign output_addr = 9'd8;
 
+reg [N-1:0] enable_input;
 
-localparam ONE = 16'b1;
+always @(posedge clk) begin
+	if (rst) begin
+		enable_input <= 0;
+	end else begin
+		case (bram_data_addr)
+			9'd0: enable_input <= {{(N-1){1'b0}}, 1'b1};
+			9'd1: enable_input <= {{(N-2){1'b0}}, 2'b10};
+			9'd2: enable_input <= {{(N-3){1'b0}}, 3'b100};
+			9'd3: enable_input <= {{(N-4){1'b0}}, 4'b1000};
+			9'd4: enable_input <= {{(N-5){1'b0}}, 5'b10000};
+			9'd5: enable_input <= {{(N-6){1'b0}}, 6'b100000};
+			9'd6: enable_input <= {{(N-7){1'b0}}, 7'b1000000};
+			9'd7: enable_input <= {{(N-8){1'b0}}, 8'b10000000};
+			default: enable_input <= 0;
+		endcase
+	end
+end
 
 generate
 	genvar i;
-	for (i = N-1; i > 0; i=i-1) 
-	begin:input_pipeline
+	for (i = 1; i <= N; i = i + 1)
+	begin:input_registers
 
-		dffre #(16) x_shift_register(
-			.clk(clk),
-			.r(rst),
-			.en(state==LOAD_DATA),
-			.d( x[16*(i+1)-1:16*i] ),
-			.q( x[16*i-1:16*(i-1)] )
-		);
+	dffre #(16) x_register(
+		.clk(clk),
+		.r  (rst),
+		.en (enable_input[i-1]),
+		.d  (bram_data[15:0]),
+		.q  (x[16*i-1:16*(i-1)])
+	);
 
-		dffre #(16) w_shift_register(
-			.clk(clk),
-			.r(rst),
-			.en(state==LOAD_DATA),
-			.d( w[16*(i+1)-1:16*i] ),
-			.q( w[16*i-1:16*(i-1)] )
-		);
+	dffre #(16) w_register(
+		.clk(clk),
+		.r  (rst),
+		.en (enable_input[i-1]),
+		.d  (bram_data[31:16]),
+		.q  (w[16*i-1:16*(i-1)])
+	);
 
 	end
 endgenerate
 
 perceptron #(N) perceptron(
-	.clk(clk),
-	.enable(perceptron_enable),
-	.x({N{16'b1}}), 
-	.w({N{16'd2}}),
-	.y(perceptron_out),
-	.fire(fire)
+	.clk    (clk),
+	.rst    (rst),
+	.enable (enable),
+	.x      (x),
+	.w      (w),
+	.y      (perceptron_out),
+	.fire   (fire)
 );
 
 endmodule
