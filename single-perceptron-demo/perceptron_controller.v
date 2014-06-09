@@ -29,40 +29,30 @@ module perceptron_controller(
 );
 
 parameter N = 8;
+parameter START_ADDR = 9'd0;
 
 wire [16*N-1:0] x,w;
 
-assign output_addr = 9'd8;
-
-reg [N-1:0] enable_input;
-
-always @(posedge clk) begin
-	if (rst) begin
-		enable_input <= 0;
-	end else begin
-		case (bram_data_addr)
-			9'd0: enable_input <= {{(N-1){1'b0}}, 1'b1};
-			9'd1: enable_input <= {{(N-2){1'b0}}, 2'b10};
-			9'd2: enable_input <= {{(N-3){1'b0}}, 3'b100};
-			9'd3: enable_input <= {{(N-4){1'b0}}, 4'b1000};
-			9'd4: enable_input <= {{(N-5){1'b0}}, 5'b10000};
-			9'd5: enable_input <= {{(N-6){1'b0}}, 6'b100000};
-			9'd6: enable_input <= {{(N-7){1'b0}}, 7'b1000000};
-			9'd7: enable_input <= {{(N-8){1'b0}}, 8'b10000000};
-			default: enable_input <= 0;
-		endcase
-	end
-end
+assign output_addr = START_ADDR + N;
 
 generate
 	genvar i;
 	for (i = 1; i <= N; i = i + 1)
 	begin:input_registers
 
+	reg enable_input;
+	always @(posedge clk) begin
+		if (rst) begin
+			enable_input <= 0;
+		end else begin
+			enable_input <= (bram_data_addr - START_ADDR) == i - 1;
+		end
+	end
+
 	dffre #(16) x_register(
 		.clk(clk),
 		.r  (rst),
-		.en (enable_input[i-1]),
+		.en (enable_input),
 		.d  (bram_data[15:0]),
 		.q  (x[16*i-1:16*(i-1)])
 	);
@@ -70,7 +60,7 @@ generate
 	dffre #(16) w_register(
 		.clk(clk),
 		.r  (rst),
-		.en (enable_input[i-1]),
+		.en (enable_input),
 		.d  (bram_data[31:16]),
 		.q  (w[16*i-1:16*(i-1)])
 	);
