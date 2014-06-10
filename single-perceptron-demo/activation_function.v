@@ -24,8 +24,18 @@ module activation_function(
     output reg signed [15 : 0] y
 );
 
+localparam ONESHIFT = 14;
+localparam ONE = 48'b1 << ONESHIFT;
+localparam NEG_ONE = -ONE;
+
 always @(posedge clk) begin
-	y <= x[15:0];
+	if ($signed(x) > $signed(ONE)) begin
+		y <= 16'h4000;
+	end else if ($signed(x) < $signed(NEG_ONE)) begin
+		y <= 16'hc000;
+	end else begin
+		y <= x[ONESHIFT + 1:ONESHIFT - 14];
+	end
 end
 
 endmodule

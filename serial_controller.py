@@ -22,6 +22,7 @@ def fpga_perceptron(hex_output_reg):
     fpga.write('p')
     fpga_read(hex_output_reg)
 
+print 'Test 1'
 fpga_write('00', '00080001')
 fpga_write('01', '00070002')
 fpga_write('02', '00060003')
@@ -30,5 +31,31 @@ fpga_write('04', '00040005')
 fpga_write('05', '00030006')
 fpga_write('06', '00020007')
 fpga_write('07', '00010008')
+fpga_perceptron('08')
+fpga_write('08', '00000000')
+
+print ''
+print 'Test 2: Squash to 1'
+fpga_write('00', '40010002')
+fpga_write('01', '00000000')
+fpga_write('02', '00000000')
+fpga_write('03', '00000000')
+fpga_write('04', '00000000')
+fpga_write('05', '00000000')
+fpga_write('06', '00000000')
+fpga_write('07', '00000000')
+fpga_perceptron('08')
+fpga_write('08', '00000000')
+
+print ''
+print 'Test 3: Squash to -1'
+fpga_write('00', '80000001')
+fpga_write('01', '00000000')
+fpga_write('02', '00000000')
+fpga_write('03', '00000000')
+fpga_write('04', '00000000')
+fpga_write('05', '00000000')
+fpga_write('06', '00000000')
+fpga_write('07', '00000000')
 fpga_perceptron('08')
 fpga_write('08', '00000000')
