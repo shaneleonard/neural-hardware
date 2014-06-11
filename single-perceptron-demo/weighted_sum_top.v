@@ -73,8 +73,8 @@ generate
 
 		weighted_sum_slice slice(
 			.clk  ( clk               ),
-			.a    ( {2'b0, x_delayed} ),
-			.b    ( {2'b0, w_delayed} ),
+			.a    ( {x_delayed[15], x_delayed[15], x_delayed} ),
+			.b    ( {w_delayed[15], w_delayed[15], w_delayed} ),
 			.pcin ( carry[i-2]        ),
 			.pcout( carry[i-1]        ),
 			.p    ( int_sum[i-1]      )
