@@ -1,4 +1,4 @@
 €}q(Ushutil]q(UcopyfileqUignore_patternsqUcopytreeqUget_archive_formatsqUcopyfileobjqUregister_archive_formatqUcopymodeq	Umake_archiveq
 UmoveqUunregister_archive_formatqUrmtreeqUErrorqUcopyqU	ExecErrorqUcopy2qUSpecialFileErrorqUcopystatqUWindowsErrorqeUos]q(Upopen4qUexecleqUpopen3qUSEEK_CURqUspawnlpqUexeclpqUenvironqUspawnvpqUspawnlqUexecvpqUmakedirsq Ulinesepq!UP_WAITq"Uspawnvq#Uspawnveq$Uexecvpeq%Uunsetenvq&USEEK_SETq'Ugetenvq(Upopen2q)Uwalkq*Uspawnleq+Uexeclq,Unameq-USEEK_ENDq.Uspawnlpeq/U	P_NOWAITOq0UP_NOWAITq1U
 removedirsq2Urenamesq3Uspawnvpeq4Uexeclpeq5eUserial_controller]q6(Uwstepq7U
-fpga_writeq8Ufpgaq9U	fpga_readq:U	hex_to_wtq;Usquashq<U	one_shiftq=Uwmaxq>Uwminq?U	wt_to_hexq@Ufpga_perceptronqAeUdatetime]qB(U	timedeltaqCUMAXYEARqDUdateqEUdatetime_CAPIqFUtzinfoqGUtimeqHUMINYEARqIUdatetimeqJeu.
+fpga_writeq8Ufpgaq9U	fpga_readq:U	hex_to_wtq;Usquashq<U	one_shiftq=Uwmaxq>Uwminq?U	wt_to_hexq@Ucompare_approxqAUfpga_perceptronqBeUdatetime]qC(U	timedeltaqDUMAXYEARqEUdateqFUdatetime_CAPIqGUtzinfoqHUtimeqIUMINYEARqJUdatetimeqKeu.

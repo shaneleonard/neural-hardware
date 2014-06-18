@@ -52,7 +52,15 @@ def fpga_perceptron(hex_output_reg):
     fpga.write('p')
     fpga_read(hex_output_reg)
 
+
+def compare_approx(val):
+    hex_val = wt_to_hex(val)
+    approx = hex_to_wt(hex_val)
+    print "% 6g   % 6g   % 6g" % (val, approx, val - approx)
+
+
 print "Weight range: (" + str(wmin), str(wmax) + ")"
+print "Step size:", wstep
 
 print ''
 print 'Test 1'
