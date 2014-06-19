@@ -30,11 +30,11 @@ localparam NEG_ONE = -ONE;
 
 always @(posedge clk) begin
 	if ($signed(x) > $signed(ONE)) begin
-		y <= 16'h4000;
+		y <= ONE[2*ONESHIFT+1:2*ONESHIFT-14];
 	end else if ($signed(x) < $signed(NEG_ONE)) begin
-		y <= 16'hc000;
+		y <= NEG_ONE[2*ONESHIFT+1:2*ONESHIFT-14];
 	end else begin
-		y <= x[ONESHIFT + 15:ONESHIFT];
+		y <= x[2*ONESHIFT+1:2*ONESHIFT-14];
 	end
 end
 
