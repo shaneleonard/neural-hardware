@@ -6,11 +6,3 @@ wire [$w: 0] $wire.name;
 wire $wire.name;
 #end if
 #end for
-#for $reg in $regs
-#if $reg.width > 1
-#set $w = $reg.width - 1
-reg [$w: 0] $reg.name;
-#else
-reg $reg.name;
-#end if
-#end for

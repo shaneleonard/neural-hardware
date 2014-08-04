@@ -52,7 +52,8 @@ def convert_to_rom_values(filereader):
 
 
 def reldir(relpath):
-    return path.normpath(path.join(path.dirname(__file__), relpath))
+    return path.normpath(path.join(path.dirname(path.abspath(__file__)),
+                                   relpath))
 
 
 rom_rows = convert_to_rom_values(fileinput.input())
