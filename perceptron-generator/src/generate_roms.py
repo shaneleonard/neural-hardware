@@ -20,6 +20,7 @@
 # ******************************************************************************
 
 import fileinput
+from os import path
 from rom import rom
 
 
@@ -50,12 +51,18 @@ def convert_to_rom_values(filereader):
     return [[num_to_verilog(val) for val in row] for row in transposed_rows]
 
 
+def reldir(relpath):
+    return path.normpath(path.join(path.dirname(__file__), relpath))
+
+
 rom_rows = convert_to_rom_values(fileinput.input())
 rom = rom()
 
+out_dir = reldir("../output/")
 for i in range(len(rom_rows)):
     rom_name = "neuron_rom{}".format(i)
-    with open("../output/{}.v".format(rom_name), "w") as f:
+    rom_file = "{}.v".format(rom_name)
+    with open(path.join(out_dir, rom_file), "w") as f:
         rom.name = rom_name
         rom.addr_width = 16
         rom.dout_width = 16

@@ -1,0 +1,17 @@
+module ${name}(
+#set $i = 1
+#for $port in $ports
+#if $port.width > 1
+    #set $w = $port.width - 1
+    ${port.dir}put [$w: 0] ${port.name}#slurp   
+#else
+    ${port.dir}put ${port.name}#slurp
+#end if
+#if $i != $len($ports)
+,
+#else
+
+#end if
+#set $i = $i + 1
+#end for
+);

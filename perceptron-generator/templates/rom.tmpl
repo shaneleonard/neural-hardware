@@ -1,7 +1,9 @@
+#set $aw = $addr_width - 1
+#set $dw = $dout_width - 1
 module ${name}(
     input clk,
-    input [$addr_width - 1: 0] addr,
-    output [$dout_width - 1: 0] dout,
+    input      [$aw: 0] addr,
+    output reg [$dw: 0] dout,
 );
 
 always @(posedge clk) begin

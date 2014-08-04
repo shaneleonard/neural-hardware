@@ -1,0 +1,27 @@
+#if $len($params) == 0
+$module_name ${instance_name}(
+#else if $len($params) == 1
+$module_name #(${params[0].value}) ${instance_name}(
+#else
+$module_name #(
+    #set $i = 1
+    #for $param in $params
+    #if $i != $len($params)
+    .${param.name}(${param.value}),
+    #else
+    .${param.name}(${param.value})
+    #end if
+    #set $i = $i + 1
+    #end for
+) ${instance_name}(
+#end if
+#set $i = 1
+#for $port in $ports
+    #if $i != $len($ports)
+    .${port.name}(${port.value}),
+    #else
+    .${port.name}(${port.value})
+    #end if
+    #set $i = $i + 1
+#end for
+);
