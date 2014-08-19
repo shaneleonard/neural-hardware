@@ -22,16 +22,14 @@
 import fileinput
 from os import path
 from rom import rom
+from fpga_math import discrete
 
-
-def wstep():
-    one_shift = 8
-    return 2**-one_shift
+M = 100
+n = 8
 
 
 def num_to_verilog(val):
-    n = int(round(val/wstep()))
-    return "16'h{0:0{1}x}".format(n & 0xffff, 4)
+    return "16'd{}".format(discrete(val, M, n))
 
 
 def zero_pad(nums, l):

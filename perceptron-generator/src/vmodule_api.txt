@@ -1,0 +1,6 @@
+from vmodule import vmodule
+
+demo_top = vmodule()
+demo_top.hydrate("demo_top.v")
+print demo_top.submodules()
+
